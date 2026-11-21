@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import VolInput from './volinput';
 import './simple.css'
 
 var decimalRegex = '[0-9]+([\.][0-9]+)?'
 var intRegex = '[0-9]+'
 
-
-
-class Simple extends Component {
-  state = {
+function Simple() {
+  const { t } = useTranslation();
+  const [state, setState] = useState({
     dextroseConcentration: '',
     volume: '',
     d70Total: 0,
@@ -20,136 +20,132 @@ class Simple extends Component {
     sterileWaterVolume: 0,
     heparinnUnitsPerLiter: '',
     heparinTotal: 0,
-  }
+  });
 
-  handleDextroseConcentrationChange = (event) => {
-    var dextroseConcentration = event.target.value
-    this.setState({dextroseConcentration: dextroseConcentration},
-      () => this.sterileWaterCalculation()
-    )
-  }
-  handleNACLConcentrationChange = (event) => {
-    var naclConcentation = event.target.value
-    this.setState({naclConcentation: naclConcentation},
-       () => this.sterileWaterCalculation()
-     )
-
-  }
-  handleVolumeChange = (event) => {
-    var volume = event.target.value
-    this.setState({volume: volume},
-      ()  => this.sterileWaterCalculation()
-    )
-  }
-  handlemEqChange = (event) => {
-    var meq = event.target.value
-    this.setState({mEqperLiter: meq},
-      () => this.sterileWaterCalculation()
-    )
-  }
-
-  handleHerapinChange = (event) => {
-    var heparinUnits = event.target.value
-    this.setState({heparinnUnitsPerLiter: heparinUnits},
-      () => this.sterileWaterCalculation()
-    )
-  }
-
-  sterileWaterCalculation = () => {
-    var d70Total = ((this.state.volume * this.state.dextroseConcentration)/this.state.dextrose).toFixed(2)
-    var volumeOfNACL234 = ((this.state.volume * this.state.naclConcentation)/23.4).toFixed(2)
-    var mLPotassiumChl = (this.state.mEqperLiter * this.state.volume) / 2000
-    var heparinTotal = (this.state.heparinnUnitsPerLiter * this.state.volume) / 100000
-    var sterileWaterVolume = (this.state.volume - d70Total - volumeOfNACL234 - mLPotassiumChl - heparinTotal).toFixed(2)
-    this.setState({
+  const sterileWaterCalculation = (newState) => {
+    var d70Total = ((newState.volume * newState.dextroseConcentration)/newState.dextrose).toFixed(2)
+    var volumeOfNACL234 = ((newState.volume * newState.naclConcentation)/23.4).toFixed(2)
+    var mLPotassiumChl = (newState.mEqperLiter * newState.volume) / 2000
+    var heparinTotal = (newState.heparinnUnitsPerLiter * newState.volume) / 100000
+    var sterileWaterVolume = (newState.volume - d70Total - volumeOfNACL234 - mLPotassiumChl - heparinTotal).toFixed(2)
+    setState({
+      ...newState,
       d70Total: d70Total,
-      volumeOfNACL234:volumeOfNACL234,
+      volumeOfNACL234: volumeOfNACL234,
       mLPotassiumChl: mLPotassiumChl,
       heparinTotal: heparinTotal,
       sterileWaterVolume: sterileWaterVolume,
     })
   }
 
-  render() {
-    return (
-      <div className='labMathBody'>
-        <div className='equation'>
-          <div className='MathHeader'>Total Volume</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-                <input type='number' pattern={intRegex} placeholder='Total Volume' value={this.state.volume} onChange={this.handleVolumeChange} />
-            </form>
-          </div>
-        </div>
-        <div className='equation'>
-          <div className='MathHeader'>Dextrose (using 70%)</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input
-                type='number' pattern={decimalRegex} placeholder='Concentration %' value={this.state.dextroseConcentration} onChange={this.handleDextroseConcentrationChange} />
-              <div>
-              (<VolInput volume={this.state.volume} />)
+  const handleDextroseConcentrationChange = (event) => {
+    var dextroseConcentration = event.target.value
+    const newState = {...state, dextroseConcentration: dextroseConcentration}
+    sterileWaterCalculation(newState)
+  }
 
-              </div>
-            </form>
-            <div className='equation-right'>{this.state.d70Total}</div>
-          </div>
-        </div>
-        <div className='equation'>
-          <div className='MathHeader'>Sodium Chloride (using 23.4%)</div>
-            <div className='equation-body'>
-            <form className='equation-left'>
-              <input
-                type='number' pattern={decimalRegex}
-                placeholder='NaCL %' value={this.state.naclConcentation} onChange={this.handleNACLConcentrationChange} />
-              <div>
-              (<VolInput volume={this.state.volume} />)
+  const handleNACLConcentrationChange = (event) => {
+    var naclConcentation = event.target.value
+    const newState = {...state, naclConcentation: naclConcentation}
+    sterileWaterCalculation(newState)
+  }
 
-              </div>
-            </form>
-            <div className='equation-right'>{this.state.volumeOfNACL234}</div>
-          </div>
-        </div>
-        <div className='equation'>
-          <div className='MathHeader'>Potassium Chloride (using 2 mEq/mL)</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input type='number' pattern={decimalRegex} placeholder='mEq Per Liter' value={this.state.mEqperLiter} onChange={this.handlemEqChange} />
-              <div>
-                (<VolInput volume={this.state.volume} />)
-              </div>
+  const handleVolumeChange = (event) => {
+    var volume = event.target.value
+    const newState = {...state, volume: volume}
+    sterileWaterCalculation(newState)
+  }
+
+  const handlemEqChange = (event) => {
+    var meq = event.target.value
+    const newState = {...state, mEqperLiter: meq}
+    sterileWaterCalculation(newState)
+  }
+
+  const handleHerapinChange = (event) => {
+    var heparinUnits = event.target.value
+    const newState = {...state, heparinnUnitsPerLiter: heparinUnits}
+    sterileWaterCalculation(newState)
+  }
+
+  return (
+    <div className='labMathBody'>
+      <div className='equation'>
+        <div className='MathHeader'>{t('totalVolume')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+              <input type='number' pattern={intRegex} placeholder={t('totalVolume')} value={state.volume} onChange={handleVolumeChange} />
           </form>
-          <div className='equation-right'> {this.state.mLPotassiumChl}</div>
-
-          </div>
-        </div>
-        <div className='equation'>
-          <div className='MathHeader'>Heparin (using 100 unit/mL)</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input
-                type='number' pattern={decimalRegex}
-                placeholder='Units per Liter'
-                value={this.state.heparinnUnitsPerLiter}
-                onChange={this.handleHerapinChange} />
-              <div>
-              (<VolInput volume={this.state.volume} />)
-              </div>
-          </form>
-          <div className='equation-right'> {this.state.heparinTotal}</div>
-
-          </div>
-        </div>
-        <div className='equation'>
-          <div className='MathHeader'> Volume of Sterile Water</div>
-          <div className='equation-body'>
-            <div className='equation-left'>{this.state.volume ? this.state.volume : 'TV'} - {this.state.d70Total} - {this.state.volumeOfNACL234} - {this.state.mLPotassiumChl} - {this.state.heparinTotal}</div>
-            <div className='equation-right'>{this.state.sterileWaterVolume}</div>
-          </div>
         </div>
       </div>
-    )
-  }
+      <div className='equation'>
+        <div className='MathHeader'>{t('dextrose')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input
+              type='number' pattern={decimalRegex} placeholder={t('concentrationPct')} value={state.dextroseConcentration} onChange={handleDextroseConcentrationChange} />
+            <div>
+            (<VolInput volume={state.volume} />)
+
+            </div>
+          </form>
+          <div className='equation-right'>{state.d70Total}</div>
+        </div>
+      </div>
+      <div className='equation'>
+        <div className='MathHeader'>{t('sodiumChloride')}</div>
+          <div className='equation-body'>
+          <form className='equation-left'>
+            <input
+              type='number' pattern={decimalRegex}
+              placeholder={t('naclPct')} value={state.naclConcentation} onChange={handleNACLConcentrationChange} />
+            <div>
+            (<VolInput volume={state.volume} />)
+
+            </div>
+          </form>
+          <div className='equation-right'>{state.volumeOfNACL234}</div>
+        </div>
+      </div>
+      <div className='equation'>
+        <div className='MathHeader'>{t('potassiumChloride')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input type='number' pattern={decimalRegex} placeholder={t('meqPerLiter')} value={state.mEqperLiter} onChange={handlemEqChange} />
+            <div>
+              (<VolInput volume={state.volume} />)
+            </div>
+        </form>
+        <div className='equation-right'> {state.mLPotassiumChl}</div>
+
+        </div>
+      </div>
+      <div className='equation'>
+        <div className='MathHeader'>{t('heparin')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input
+              type='number' pattern={decimalRegex}
+              placeholder={t('unitsPerLiter')}
+              value={state.heparinnUnitsPerLiter}
+              onChange={handleHerapinChange} />
+            <div>
+            (<VolInput volume={state.volume} />)
+            </div>
+        </form>
+        <div className='equation-right'> {state.heparinTotal}</div>
+
+        </div>
+      </div>
+      <div className='equation'>
+        <div className='MathHeader'>{t('sterileWater')}</div>
+        <div className='equation-body'>
+          <div className='equation-left'>{state.volume ? state.volume : 'TV'} - {state.d70Total} - {state.volumeOfNACL234} - {state.mLPotassiumChl} - {state.heparinTotal}</div>
+          <div className='equation-right'>{state.sterileWaterVolume}</div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default Simple;
