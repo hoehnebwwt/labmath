@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './pharmacy.css'
 
 var decimalRegex = '[0-9]+([\.][0-9]+)?'
 var intRegex = '[0-9]+'
 
-class Pharmacy extends Component {
-  state = {
+function Pharmacy() {
+  const { t } = useTranslation();
+  const [state, setState] = useState({
     // BSA Calculation (Mosteller formula)
     heightCm: '',
     weightKg: '',
@@ -30,173 +32,191 @@ class Pharmacy extends Component {
     ibwHeight: '',
     ibwGender: 'male',
     ibw: 0,
-  }
+  });
 
   // BSA Calculation using Mosteller formula: sqrt((height * weight) / 3600)
-  handleBSAChange = () => {
-    if (this.state.heightCm && this.state.weightKg) {
-      const bsa = Math.sqrt((this.state.heightCm * this.state.weightKg) / 3600).toFixed(2)
-      this.setState({ bsa: bsa })
+  const handleBSAChange = (newState) => {
+    if (newState.heightCm && newState.weightKg) {
+      const bsa = Math.sqrt((newState.heightCm * newState.weightKg) / 3600).toFixed(2)
+      setState({ ...newState, bsa: bsa })
+    } else {
+      setState(newState)
     }
   }
 
-  handleHeightChange = (event) => {
-    this.setState({ heightCm: event.target.value }, this.handleBSAChange)
+  const handleHeightChange = (event) => {
+    const newState = { ...state, heightCm: event.target.value }
+    handleBSAChange(newState)
   }
 
-  handleWeightChange = (event) => {
-    this.setState({ weightKg: event.target.value }, this.handleBSAChange)
+  const handleWeightChange = (event) => {
+    const newState = { ...state, weightKg: event.target.value }
+    handleBSAChange(newState)
   }
 
   // BMI Calculation: weight (kg) / (height (m))^2
-  handleBMIChange = () => {
-    if (this.state.bmiHeight && this.state.bmiWeight) {
-      const heightM = this.state.bmiHeight / 100
-      const bmi = (this.state.bmiWeight / (heightM * heightM)).toFixed(2)
-      this.setState({ bmi: bmi })
+  const handleBMIChange = (newState) => {
+    if (newState.bmiHeight && newState.bmiWeight) {
+      const heightM = newState.bmiHeight / 100
+      const bmi = (newState.bmiWeight / (heightM * heightM)).toFixed(2)
+      setState({ ...newState, bmi: bmi })
+    } else {
+      setState(newState)
     }
   }
 
-  handleBMIHeightChange = (event) => {
-    this.setState({ bmiHeight: event.target.value }, this.handleBMIChange)
+  const handleBMIHeightChange = (event) => {
+    const newState = { ...state, bmiHeight: event.target.value }
+    handleBMIChange(newState)
   }
 
-  handleBMIWeightChange = (event) => {
-    this.setState({ bmiWeight: event.target.value }, this.handleBMIChange)
+  const handleBMIWeightChange = (event) => {
+    const newState = { ...state, bmiWeight: event.target.value }
+    handleBMIChange(newState)
   }
 
   // Pediatric Dosing using Clark's Rule: (child weight / 70) * adult dose
-  handlePediatricChange = () => {
-    if (this.state.childWeight && this.state.adultDose) {
-      const pediatricDose = ((this.state.childWeight / 70) * this.state.adultDose).toFixed(2)
-      this.setState({ pediatricDose: pediatricDose })
+  const handlePediatricChange = (newState) => {
+    if (newState.childWeight && newState.adultDose) {
+      const pediatricDose = ((newState.childWeight / 70) * newState.adultDose).toFixed(2)
+      setState({ ...newState, pediatricDose: pediatricDose })
+    } else {
+      setState(newState)
     }
   }
 
-  handleChildWeightChange = (event) => {
-    this.setState({ childWeight: event.target.value }, this.handlePediatricChange)
+  const handleChildWeightChange = (event) => {
+    const newState = { ...state, childWeight: event.target.value }
+    handlePediatricChange(newState)
   }
 
-  handleAdultDoseChange = (event) => {
-    this.setState({ adultDose: event.target.value }, this.handlePediatricChange)
+  const handleAdultDoseChange = (event) => {
+    const newState = { ...state, adultDose: event.target.value }
+    handlePediatricChange(newState)
   }
 
   // Renal Dosing using Cockcroft-Gault: ((140 - age) * weight) / (72 * creatinine)
   // For females, multiply by 0.85
-  handleRenalChange = () => {
-    if (this.state.age && this.state.weightKg && this.state.creatinine) {
-      let clearance = ((140 - this.state.age) * this.state.weightKg) / (72 * this.state.creatinine)
+  const handleRenalChange = (newState) => {
+    if (newState.age && newState.weightKg && newState.creatinine) {
+      let clearance = ((140 - newState.age) * newState.weightKg) / (72 * newState.creatinine)
       // Note: This simplified version doesn't include gender adjustment
       clearance = clearance.toFixed(2)
-      this.setState({ renalClearance: clearance })
+      setState({ ...newState, renalClearance: clearance })
+    } else {
+      setState(newState)
     }
   }
 
-  handleAgeChange = (event) => {
-    this.setState({ age: event.target.value }, this.handleRenalChange)
+  const handleAgeChange = (event) => {
+    const newState = { ...state, age: event.target.value }
+    handleRenalChange(newState)
   }
 
-  handleCreatinineChange = (event) => {
-    this.setState({ creatinine: event.target.value }, this.handleRenalChange)
+  const handleCreatinineChange = (event) => {
+    const newState = { ...state, creatinine: event.target.value }
+    handleRenalChange(newState)
   }
 
   // Ideal Body Weight calculation
   // Male: 50 kg + 2.3 kg per inch over 5 feet
   // Female: 45.5 kg + 2.3 kg per inch over 5 feet
-  handleIBWChange = () => {
-    if (this.state.ibwHeight) {
-      const totalInches = this.state.ibwHeight
+  const handleIBWChange = (newState) => {
+    if (newState.ibwHeight) {
+      const totalInches = newState.ibwHeight
       const feetInches = totalInches - 60 // subtract 5 feet (60 inches)
       
       let ibw
-      if (this.state.ibwGender === 'male') {
+      if (newState.ibwGender === 'male') {
         ibw = 50 + (feetInches * 2.3)
       } else {
         ibw = 45.5 + (feetInches * 2.3)
       }
       
-      this.setState({ ibw: ibw.toFixed(2) })
+      setState({ ...newState, ibw: ibw.toFixed(2) })
+    } else {
+      setState(newState)
     }
   }
 
-  handleIBWHeightChange = (event) => {
-    this.setState({ ibwHeight: event.target.value }, this.handleIBWChange)
+  const handleIBWHeightChange = (event) => {
+    const newState = { ...state, ibwHeight: event.target.value }
+    handleIBWChange(newState)
   }
 
-  handleIBWGenderChange = (event) => {
-    this.setState({ ibwGender: event.target.value }, this.handleIBWChange)
+  const handleIBWGenderChange = (event) => {
+    const newState = { ...state, ibwGender: event.target.value }
+    handleIBWChange(newState)
   }
 
-  render() {
-    return (
-      <div className='pharmacyBody'>
-        <div className='equation'>
-          <div className='MathHeader'>Body Surface Area (BSA) - Mosteller Formula</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input type='number' pattern={decimalRegex} placeholder='Height (cm)' value={this.state.heightCm} onChange={this.handleHeightChange} />
-              <input type='number' pattern={decimalRegex} placeholder='Weight (kg)' value={this.state.weightKg} onChange={this.handleWeightChange} />
-              <div>√((Height × Weight) / 3600)</div>
-            </form>
-            <div className='equation-right'>{this.state.bsa} m²</div>
-          </div>
-        </div>
-
-        <div className='equation'>
-          <div className='MathHeader'>Body Mass Index (BMI)</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input type='number' pattern={decimalRegex} placeholder='Height (cm)' value={this.state.bmiHeight} onChange={this.handleBMIHeightChange} />
-              <input type='number' pattern={decimalRegex} placeholder='Weight (kg)' value={this.state.bmiWeight} onChange={this.handleBMIWeightChange} />
-              <div>Weight (kg) / (Height (m))²</div>
-            </form>
-            <div className='equation-right'>{this.state.bmi} kg/m²</div>
-          </div>
-        </div>
-
-        <div className='equation'>
-          <div className='MathHeader'>Pediatric Dosing - Clark's Rule</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input type='number' pattern={decimalRegex} placeholder='Child Weight (kg)' value={this.state.childWeight} onChange={this.handleChildWeightChange} />
-              <input type='number' pattern={decimalRegex} placeholder='Adult Dose (mg)' value={this.state.adultDose} onChange={this.handleAdultDoseChange} />
-              <div>(Child Weight / 70) × Adult Dose</div>
-            </form>
-            <div className='equation-right'>{this.state.pediatricDose} mg</div>
-          </div>
-        </div>
-
-        <div className='equation'>
-          <div className='MathHeader'>Renal Clearance - Cockcroft-Gault</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <input type='number' pattern={intRegex} placeholder='Age (years)' value={this.state.age} onChange={this.handleAgeChange} />
-              <input type='number' pattern={decimalRegex} placeholder='Weight (kg)' value={this.state.weightKg} onChange={this.handleWeightChange} />
-              <input type='number' pattern={decimalRegex} placeholder='Serum Creatinine (mg/dL)' value={this.state.creatinine} onChange={this.handleCreatinineChange} />
-              <div>((140 - Age) × Weight) / (72 × Creatinine)</div>
-            </form>
-            <div className='equation-right'>{this.state.renalClearance} mL/min</div>
-          </div>
-        </div>
-
-        <div className='equation'>
-          <div className='MathHeader'>Ideal Body Weight (IBW)</div>
-          <div className='equation-body'>
-            <form className='equation-left'>
-              <select value={this.state.ibwGender} onChange={this.handleIBWGenderChange}>
-                <option value='male'>Male</option>
-                <option value='female'>Female</option>
-              </select>
-              <input type='number' pattern={intRegex} placeholder='Height (inches)' value={this.state.ibwHeight} onChange={this.handleIBWHeightChange} />
-              <div>Male: 50 + 2.3 × (inches over 5ft)</div>
-              <div>Female: 45.5 + 2.3 × (inches over 5ft)</div>
-            </form>
-            <div className='equation-right'>{this.state.ibw} kg</div>
-          </div>
+  return (
+    <div className='pharmacyBody'>
+      <div className='equation'>
+        <div className='MathHeader'>{t('bsa')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input type='number' pattern={decimalRegex} placeholder={t('heightCm')} value={state.heightCm} onChange={handleHeightChange} />
+            <input type='number' pattern={decimalRegex} placeholder={t('weightKg')} value={state.weightKg} onChange={handleWeightChange} />
+            <div>{t('bsaFormula')}</div>
+          </form>
+          <div className='equation-right'>{state.bsa} m²</div>
         </div>
       </div>
-    )
-  }
+
+      <div className='equation'>
+        <div className='MathHeader'>{t('bmi')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input type='number' pattern={decimalRegex} placeholder={t('heightCm')} value={state.bmiHeight} onChange={handleBMIHeightChange} />
+            <input type='number' pattern={decimalRegex} placeholder={t('weightKg')} value={state.bmiWeight} onChange={handleBMIWeightChange} />
+            <div>{t('bmiFormula')}</div>
+          </form>
+          <div className='equation-right'>{state.bmi} kg/m²</div>
+        </div>
+      </div>
+
+      <div className='equation'>
+        <div className='MathHeader'>{t('pediatricDosing')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input type='number' pattern={decimalRegex} placeholder={t('childWeightKg')} value={state.childWeight} onChange={handleChildWeightChange} />
+            <input type='number' pattern={decimalRegex} placeholder={t('adultDoseMg')} value={state.adultDose} onChange={handleAdultDoseChange} />
+            <div>{t('clarksFormula')}</div>
+          </form>
+          <div className='equation-right'>{state.pediatricDose} mg</div>
+        </div>
+      </div>
+
+      <div className='equation'>
+        <div className='MathHeader'>{t('renalClearance')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <input type='number' pattern={intRegex} placeholder={t('ageYears')} value={state.age} onChange={handleAgeChange} />
+            <input type='number' pattern={decimalRegex} placeholder={t('weightKg')} value={state.weightKg} onChange={handleWeightChange} />
+            <input type='number' pattern={decimalRegex} placeholder={t('serumCreatinine')} value={state.creatinine} onChange={handleCreatinineChange} />
+            <div>{t('cgFormula')}</div>
+          </form>
+          <div className='equation-right'>{state.renalClearance} mL/min</div>
+        </div>
+      </div>
+
+      <div className='equation'>
+        <div className='MathHeader'>{t('ibw')}</div>
+        <div className='equation-body'>
+          <form className='equation-left'>
+            <select value={state.ibwGender} onChange={handleIBWGenderChange}>
+              <option value='male'>{t('male')}</option>
+              <option value='female'>{t('female')}</option>
+            </select>
+            <input type='number' pattern={intRegex} placeholder={t('heightInches')} value={state.ibwHeight} onChange={handleIBWHeightChange} />
+            <div>{t('ibwMaleFormula')}</div>
+            <div>{t('ibwFemaleFormula')}</div>
+          </form>
+          <div className='equation-right'>{state.ibw} kg</div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default Pharmacy;
